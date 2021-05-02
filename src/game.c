@@ -4,6 +4,7 @@
 // ============== Setup Stuff  =================
 int frame = 1;
 int doLoop = 1;
+int finish = 0;
 void setup();
 void draw();
 
@@ -56,6 +57,7 @@ void setup()
     {
     case 1:
     case 2:
+        doLoop = 1;
         draw();
         break;
     case 3:
@@ -63,6 +65,7 @@ void setup()
         setup();
         break;
     case 4:
+        finish = 1;
         noLoop();
     }
 }
@@ -83,9 +86,7 @@ void draw()
             printf("It's a Tie!!!\n");
         pause();
         printf("\n");
-        setup();
-        if (mode == 4)
-            noLoop();
+        noLoop();
     }
 
     clear();

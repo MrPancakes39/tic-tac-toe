@@ -4,5 +4,6 @@
 void setup();
 void draw();
 extern int doLoop;
+extern int finish;
 
 #endif
