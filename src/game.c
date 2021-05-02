@@ -4,6 +4,8 @@
 // ============== Setup Stuff  =================
 int frame = 1;
 int doLoop = 1;
+void setup();
+void draw();
 
 #define noLoop()    \
     do              \
@@ -16,13 +18,14 @@ int doLoop = 1;
 // ============= Game Functions  ================
 void drawMenu();
 void drawGrid();
+void drawTutorial();
 void switchPlayer();
 void checkWinner();
 // =============================================
 
 // ============== GLobal Vars  =================
 char grid[3][3];
-int mode = 1;
+int mode = 0;
 char currentPlayer[] = "Player X";
 int winner = 0;
 
@@ -40,7 +43,17 @@ void setup()
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             grid[i][j] = ' ';
-    // drawMenu();
+    drawMenu();
+    switch (mode)
+    {
+    case 1:
+        draw();
+        break;
+    case 3:
+        drawTutorial();
+        setup();
+        break;
+    }
 }
 
 void draw()
@@ -57,6 +70,8 @@ void draw()
             printf("The Winner is O!!!\n");
         else
             printf("It's a Tie!!!\n");
+        pause();
+        printf("\n");
         noLoop();
     }
     int success;
@@ -64,6 +79,7 @@ void draw()
     {
         printf("%s's Turn: ", currentPlayer);
         scanf("%d,%d", &pos.x, &pos.y);
+        getchar();
         if ((pos.x < 0 || pos.x > 2) && (pos.y < 0 || pos.y > 2))
         {
             printf("Choose numbers between 0 and 2.\n");
@@ -90,6 +106,7 @@ void drawMenu()
     puts("===============================");
     puts("1- Player vs Player Mode");
     puts("2- Player vs Computer Mode");
+    puts("3- Tutorial");
 
     int choice = 0;
     do
@@ -98,7 +115,7 @@ void drawMenu()
         scanf("%d", &choice);
         getchar();
 
-        if (choice < 1 || choice > 2)
+        if (choice < 1 || choice > 4)
         {
             printf("Not a valid option! Please choose again.\n");
             choice = 0;
@@ -120,6 +137,27 @@ void drawGrid()
     printf("1  %c | %c | %c \n", grid[1][0], grid[1][1], grid[1][2]);
     printf("  -----------\n");
     printf("2  %c | %c | %c \n", grid[2][0], grid[2][1], grid[2][2]);
+}
+
+void drawTutorial()
+{
+    clear();
+    puts("Tutorial: ");
+    puts("=========");
+    puts("Below is the grid for tic-tac-toe");
+    drawGrid();
+    pause();
+
+    clear();
+    puts("Tutorial: ");
+    puts("=========");
+    puts("You need to type row,col to place your your symbol in the cell");
+    puts("For example let me say I Player X type 0,1");
+    grid[0][1] = 'X';
+    drawGrid();
+    puts("\nNow I got My Symbol X into 0,1");
+    puts("That's the end of the tutorial, enjoy!\n");
+    pause();
 }
 
 void switchPlayer()
