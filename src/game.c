@@ -43,6 +43,9 @@ void setup()
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             grid[i][j] = ' ';
+    mode = 0;
+    currentPlayer[7] = 'X';
+    winner = 0;
     drawMenu();
     switch (mode)
     {
@@ -53,6 +56,8 @@ void setup()
         drawTutorial();
         setup();
         break;
+    case 4:
+        noLoop();
     }
 }
 
@@ -72,8 +77,13 @@ void draw()
             printf("It's a Tie!!!\n");
         pause();
         printf("\n");
-        noLoop();
+        setup();
+        if (mode == 4)
+            noLoop();
     }
+
+    clear();
+    drawGrid();
     int success;
     do
     {
@@ -107,6 +117,7 @@ void drawMenu()
     puts("1- Player vs Player Mode");
     puts("2- Player vs Computer Mode");
     puts("3- Tutorial");
+    puts("4- Exit");
 
     int choice = 0;
     do
