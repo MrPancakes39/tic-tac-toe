@@ -3,10 +3,13 @@
 
 int main(void)
 {
-    setup();
-    while (doLoop)
+    while (!finish)
     {
-        draw();
+        setup();
+        while (doLoop)
+        {
+            draw();
+        }
     }
     return 0;
 }
