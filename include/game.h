@@ -3,8 +3,6 @@
 
 void setup();
 void draw();
-
 extern int doLoop;
-void noLoop();
 
 #endif

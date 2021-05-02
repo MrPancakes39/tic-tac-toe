@@ -13,6 +13,9 @@ void draw();
         doLoop = 0; \
         return;     \
     } while (0);
+
+#define max(a, b) ((a > b) ? a : b)
+#define min(a, b) ((a < b) ? a : b)
 // =============================================
 
 // ============= Game Functions  ================
@@ -20,14 +23,17 @@ void drawMenu();
 void drawGrid();
 void drawTutorial();
 void switchPlayer();
-void checkWinner();
+int checkWinner(char[3][3]);
+void humanMove();
+void aiMove();
+int scores(int);
+int minimax(char[3][3], int, int);
 // =============================================
 
 // ============== GLobal Vars  =================
 char grid[3][3];
 int mode = 0;
 char currentPlayer[] = "Player X";
-int winner = 0;
 
 struct Position
 {
@@ -45,11 +51,11 @@ void setup()
             grid[i][j] = ' ';
     mode = 0;
     currentPlayer[7] = 'X';
-    winner = 0;
     drawMenu();
     switch (mode)
     {
     case 1:
+    case 2:
         draw();
         break;
     case 3:
@@ -65,7 +71,7 @@ void draw()
 {
     clear();
     drawGrid();
-    checkWinner();
+    int winner = checkWinner(grid);
 
     if (winner)
     {
@@ -84,28 +90,10 @@ void draw()
 
     clear();
     drawGrid();
-    int success;
-    do
-    {
-        printf("%s's Turn: ", currentPlayer);
-        scanf("%d,%d", &pos.x, &pos.y);
-        getchar();
-        if ((pos.x < 0 || pos.x > 2) && (pos.y < 0 || pos.y > 2))
-        {
-            printf("Choose numbers between 0 and 2.\n");
-            success = 0;
-        }
-        else if (grid[pos.x][pos.y] == ' ')
-        {
-            grid[pos.x][pos.y] = currentPlayer[7];
-            success = 1;
-        }
-        else
-        {
-            printf("Spot Not available please choose again.\n");
-            success = 0;
-        }
-    } while (!success);
+    if (mode == 2 && currentPlayer[7] == 'X')
+        aiMove();
+    else
+        humanMove();
     switchPlayer();
     ++frame;
 }
@@ -129,11 +117,6 @@ void drawMenu()
         if (choice < 1 || choice > 4)
         {
             printf("Not a valid option! Please choose again.\n");
-            choice = 0;
-        }
-        if (choice == 2)
-        {
-            printf("AI is not available at the moment... Please choose again.\n");
             choice = 0;
         }
     } while (!choice);
@@ -179,46 +162,42 @@ void switchPlayer()
         currentPlayer[7] = 'X';
 }
 
-void checkWinner()
+int checkWinner(char board[3][3])
 {
     // Check Horizentally
     for (int i = 0; i < 3; i++)
-        if (grid[i][0] == grid[i][1] && grid[i][1] == grid[i][2] && grid[i][2] != ' ')
+        if (board[i][0] == board[i][1] && board[i][1] == board[i][2] && board[i][2] != ' ')
         {
-            if (grid[i][0] == 'X')
-                winner = 1;
+            if (board[i][0] == 'X')
+                return 1;
             else
-                winner = 2;
-            return;
+                return 2;
         }
 
     // Check Vertically
     for (int j = 0; j < 3; j++)
-        if (grid[0][j] == grid[1][j] && grid[1][j] == grid[2][j] && grid[2][j] != ' ')
+        if (board[0][j] == board[1][j] && board[1][j] == board[2][j] && board[2][j] != ' ')
         {
-            if (grid[0][j] == 'X')
-                winner = 1;
+            if (board[0][j] == 'X')
+                return 1;
             else
-                winner = 2;
-            return;
+                return 2;
         }
 
     // Check Diagonally
-    if (grid[0][0] == grid[1][1] && grid[1][1] == grid[2][2] && grid[1][1] != ' ')
+    if (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[1][1] != ' ')
     {
-        if (grid[1][1] == 'X')
-            winner = 1;
+        if (board[1][1] == 'X')
+            return 1;
         else
-            winner = 2;
-        return;
+            return 2;
     }
-    if (grid[2][0] == grid[1][1] && grid[1][1] == grid[0][2] && grid[1][1] != ' ')
+    if (board[2][0] == board[1][1] && board[1][1] == board[0][2] && board[1][1] != ' ')
     {
         if (grid[1][1] == 'X')
-            winner = 1;
+            return 1;
         else
-            winner = 2;
-        return;
+            return 2;
     }
 
     // Check For Tie
@@ -228,6 +207,98 @@ void checkWinner()
             if (grid[i][j] == ' ')
                 count++;
     if (count == 0)
-        winner = 3;
-    return;
+        return 3;
+    return 0;
+}
+
+void humanMove()
+{
+    int success;
+    do
+    {
+        printf("%s's Turn: ", currentPlayer);
+        scanf("%d,%d", &pos.x, &pos.y);
+        getchar();
+        if ((pos.x < 0 || pos.x > 2) && (pos.y < 0 || pos.y > 2))
+        {
+            printf("Choose numbers between 0 and 2.\n");
+            success = 0;
+        }
+        else if (grid[pos.x][pos.y] == ' ')
+        {
+            grid[pos.x][pos.y] = currentPlayer[7];
+            success = 1;
+        }
+        else
+        {
+            printf("Spot Not available please choose again.\n");
+            success = 0;
+        }
+    } while (!success);
+}
+
+void aiMove()
+{
+    int bestScore = -__INT_MAX__;
+    struct Position bestMove;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (grid[i][j] == ' ')
+            {
+                grid[i][j] = 'X'; // AI is X.
+                int score = minimax(grid, 0, 0);
+                grid[i][j] = ' ';
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestMove.x = i;
+                    bestMove.y = j;
+                }
+            }
+    grid[bestMove.x][bestMove.y] = 'X';
+}
+
+int scores(int result)
+{
+    if (result == 1)
+        return 1;
+    else if (result == 2)
+        return -1;
+    else
+        return 0;
+}
+
+int minimax(char board[3][3], int depth, int isMax)
+{
+    int result = checkWinner(board);
+    if (result != 0)
+        return scores(result);
+    if (isMax)
+    {
+        int bestScore = -__INT_MAX__;
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i][j] == ' ')
+                {
+                    board[i][j] = 'X';
+                    int score = minimax(board, depth + 1, 0);
+                    board[i][j] = ' ';
+                    bestScore = max(score, bestScore);
+                }
+        return bestScore;
+    }
+    else
+    {
+        int bestScore = __INT_MAX__;
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i][j] == ' ')
+                {
+                    board[i][j] = 'O';
+                    int score = minimax(grid, depth + 1, 1);
+                    board[i][j] = ' ';
+                    bestScore = min(score, bestScore);
+                }
+        return bestScore;
+    }
 }
